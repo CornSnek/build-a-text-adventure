@@ -160,7 +160,7 @@ const Path* output_path(const Path* path){
       break;
     case PathType::Worm:
       {
-        std::discrete_distribution<size_t> dd_prob({80,12,8});
+        std::discrete_distribution<size_t> dd_prob({70,18,12});
         std::uniform_int_distribution<size_t> uid_idle(0,IdleMessages.size()-1);
         std::uniform_int_distribution<size_t> uid_real_hide(0,RealHideMessages.size()-1);
         std::uniform_int_distribution<size_t> uid_fake_hide(0,FakeHideMessages.size()-1);
@@ -229,6 +229,7 @@ const Path* output_path(const Path* path){
               break;
             default:;
           }
+          now=std::chrono::high_resolution_clock::now();
           std::cout<<"You have responded in "<<std::chrono::duration_cast<std::chrono::seconds>(now-prev).count()<<" seconds."<<std::endl;
         }
         new_path=path->properties.wp.success;
