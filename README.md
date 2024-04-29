@@ -7,3 +7,6 @@ The story is that you are an adventurer that tries to get the treasures of the G
 This was an interesting project to do. I had little to no trouble in doing this project, because I have learned C++ some years ago. I am not a writer, but I have used chatgpt at https://chat.openai.com to create some prompts, like the Worm Basement Dungeon.
 
 Note: Some things in the `main.cpp` file may not be covered in codeacademy, such as function pointers, unions, void* types, `static_cast`s, lambdas, enum classes, operator overloading, constructors, and the C++ `vector`/`fstream`/`random`/`chrono` libraries.
+
+I have used MSYS2 under Windows to create this project (https://www.msys2.org), the same building platform that codecademy recommends using.
+To build the file, use the MSYS2 command prompt and in the project, type `make build` to build the project, or `make all` to clean, build, and run the project at the same time.
