@@ -188,7 +188,11 @@ const Path* output_path(const Path* path){
                 if(input=="y"||input=="n") break;
                 else std::cout<<"Invalid option!"<<std::endl;
               }
-              if(input=="y"){
+              now=std::chrono::high_resolution_clock::now();
+              if(now-prev>five_seconds){
+                new_path=path->properties.wp.responded_too_late;
+                goto has_failed;
+              }if(input=="y"){
                 new_path=path->properties.wp.hid_but_should_not_hide;
                 goto has_failed;
               }
@@ -204,7 +208,7 @@ const Path* output_path(const Path* path){
                 else std::cout<<"Invalid option!"<<std::endl;
               }
               now=std::chrono::high_resolution_clock::now();
-              if(prev-now>five_seconds){
+              if(now-prev>five_seconds){
                 new_path=path->properties.wp.responded_too_late;
                 goto has_failed;
               }else if(input=="n"){
@@ -222,14 +226,17 @@ const Path* output_path(const Path* path){
                 if(input=="y"||input=="n") break;
                 else std::cout<<"Invalid option!"<<std::endl;
               }
-              if(input=="y"){
+              now=std::chrono::high_resolution_clock::now();
+              if(prev-now>five_seconds){
+                new_path=path->properties.wp.responded_too_late;
+                goto has_failed;
+              }if(input=="y"){
                 new_path=path->properties.wp.hid_but_should_not_hide;
                 goto has_failed;
               }
               break;
             default:;
           }
-          now=std::chrono::high_resolution_clock::now();
           std::cout<<"You have responded in "<<std::chrono::duration_cast<std::chrono::seconds>(now-prev).count()<<" seconds."<<std::endl;
         }
         new_path=path->properties.wp.success;
@@ -384,7 +391,7 @@ int main() {
   std::uniform_int_distribution<int> uid_bool(0,1); //To make a wrong digit higher or lower.
   std::uniform_int_distribution<int> uid_potion_mix(0,static_cast<int>(PotionColor::COUNT)-1); //To make potions in the F_path.
   //Used temporarily as C++ doesn't allow for zero-sized arrays.
-  Path PlaceHolder(PathType::Ending,"TODO Add Words",PathProperties("TODO Ending Here"));
+  //Path PlaceHolder(PathType::Ending,"TODO Add Words",PathProperties("TODO Ending Here"));
   while(true){
     
     //Game logic to create random potions or lock combinations.
@@ -434,7 +441,7 @@ int main() {
         return *static_cast<bool*>(wizard_knocked_out_vp);
       },&wizard_knocked_out,&Gold_good_ending,&Gold_bad_ending
     )));
-    Path Gold_ghost_path(PathType::Redirect,"The ghost explains to you \"The wizard has rigged the treasure where if you touch the treasure. You will turn gold yourself.\nAs long as he is awake, the magic will turn you into a golden statue.\"\nTurning into a statue would be a horrible ending for this adventure. Let's not do that.\nHe further explains that you can try to knock a wizard out cold with a Wizard Knockout potion.",
+    Path Gold_ghost_path(PathType::Redirect,"The ghost explains to you \"The wizard has rigged the treasure where if you touch the treasure. You will turn gold yourself.\nAs long as he is awake, the magic in the room will turn you into a golden statue.\"\nTurning into a statue would be a horrible ending for this adventure. Let's not do that.\nHe further explains that you can try to knock a wizard out cold with a Wizard Knockout potion.",
       PathProperties(&Gold_path,[](void* df_potion_vp){
         PotionMixNumbers* df_potion_p=static_cast<PotionMixNumbers*>(df_potion_vp);
         std::cout<<"He tells you that the potion combination is ";
@@ -448,8 +455,14 @@ int main() {
       {"Talk to the ghost",&Gold_ghost_path},
       {"Go Back",&C_path},
     };
-    Gold_path=Path(PathType::Path,"You see piles of gold and treasures throughout this room. Just as you were to stuff your pockets, a ghost has appeared and said \"NO DON'T!\"",PathArrayAdd(Gold_path_options));
-    Path D_to_Gold_path(PathType::Redirect,"You have finally unlocked the Golden Wizard's golden door. Woohoo!",PathProperties(&Gold_path
+    Gold_path=Path(PathType::Path,nullptr,PathArrayAdd(Gold_path_options));
+    Path Gold_path0(PathType::Redirect,"You see piles of gold and treasures throughout this room.",PathProperties(
+      &Gold_path,[](void* wizard_knocked_out_vp){
+        if(!*static_cast<bool*>(wizard_knocked_out_vp)) std::cout<<"Just as you were to approach the treasure, a ghost has appeared and said \"NO DON'T!\""<<std::endl;
+        else std::cout<<"\"You did it adventurer! The Golden Wizard's magic has been dispelled. The gold is now yours,\" said the ghost."<<std::endl;
+      },&wizard_knocked_out
+    ));
+    Path D_to_Gold_path(PathType::Redirect,"You have finally unlocked the Golden Wizard's golden door. Woohoo!",PathProperties(&Gold_path0
     ,[](void* ugd_vp){
       *static_cast<bool*>(ugd_vp)=true;
     },&unlocked_gold_door));
@@ -488,7 +501,7 @@ int main() {
       {"Proceed",&G_path_worm},
       {"Not Yet (Exit Basement)",&C_path},
     };
-    Path G_path(PathType::Path,"\nIn this minigame, to hide, type 'y'. To not hide, type 'n'.\nYou have 5 seconds until the worm monster spots you and eats you alive.\nIt will also eat you if you don't have to hide.\nYou have to survive 25 trials.\nWill you procede or not?",PathArrayAdd(G_path_options));
+    Path G_path(PathType::Path,"\nIn this minigame, to hide, type 'y'. To not hide, type 'n'.\nYou have 5 seconds to type before the worm monster spots you and eats you alive.\nIt will also eat you if you don't have to hide.\nYou have to survive 25 trials in the hallway.\nWill you procede or not?",PathArrayAdd(G_path_options));
     Path C_to_G_path(PathType::Boolean,"You went to the basement to what looks like endless and endless hallways.\nA ghost appeared and said to you \"Once you reach the end, it will help on your journey to the Golden Wizard's treasures.\nHowever, the worm monster guards this hallway. If you see or hear anything strange, hide!\nDon't hide if nothing unusual happens, or the worm monster will also consume you!\nGhosts may tell you to hide, but some may trick you.",PathProperties(BooleanPath(
       [](void* shortcut_vp){
         bool found_shortcut=*static_cast<bool*>(shortcut_vp);
@@ -692,7 +705,7 @@ int main() {
     },&potion_inventory[2],&D_XRay_paper,&D_redir_multi)));
     Path C_to_D_path(PathType::Redirect,"You have approached a locked golden door with a combination of 3 digits.\nPerhaps this is where the Golden Wizard's treasure lies.\nWill you attempt to unlock the door?",PathProperties(&D_HasXRay));
     Path C_to_D_or_Gold_path(PathType::Boolean,nullptr,PathProperties(BooleanPath(
-      [](void* ugd_vp){return *static_cast<bool*>(ugd_vp); },&unlocked_gold_door,&Gold_path,&C_to_D_path
+      [](void* ugd_vp){return *static_cast<bool*>(ugd_vp); },&unlocked_gold_door,&Gold_path0,&C_to_D_path
     )));
     //C_path
     PathOption C_options[]={
