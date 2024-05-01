@@ -129,13 +129,19 @@ const Path* output_path(const Path* path){
     case PathType::Path:
       while(!new_path){
         if(path->words) std::cout<<path->words<<std::endl;
-        size_t path_num=0;
+        std::string path_num_str;
+        size_t path_num;
         std::cout<<"Choose the following paths:"<<std::endl;
         for(size_t i=0;i<path->properties.pa.size;i++){
           std::cout<<"\t"<<(i+1)<<") "<<path->properties.pa.paths[i].name<<std::endl;
         }
         std::cout<<">>> ";
-        std::cin>>path_num;
+        std::cin>>path_num_str;
+        try{
+          path_num=std::stoi(path_num_str);
+        }catch (const std::exception&){
+          path_num=0; //Default 0 for any invalid strings.
+        }
         if(path_num<1||path_num>path->properties.pa.size){
           std::cout<<"Invalid path!"<<std::endl;
           continue;
