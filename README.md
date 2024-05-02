@@ -8,5 +8,5 @@ This was an interesting project to do. I had little to no trouble in doing this 
 
 Note: Some things in the `main.cpp` file may not be covered in codeacademy, such as function pointers, unions, void* types, `static_cast`s, lambdas, enum classes, operator overloading, constructors, and the C++ `vector`/`fstream`/`random`/`chrono` libraries.
 
-I have used MSYS2 under Windows to create this project (https://www.msys2.org), the same building platform that codecademy recommends using.
-To build the file, use the MSYS2 command prompt and in the project, type `make build` to build the project, or `make all` to clean, build, and run the project at the same time.
+I have used MSYS2 under Windows to create this project (https://www.msys2.org). [https://www.codecademy.com/article/cpp-compile-execute-locally] was used to run with MSYS2 along with the makefile using `make all`.
+However, you can just type `g++ main.cpp` to build it in a MSYS2 shell.
